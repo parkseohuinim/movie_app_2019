@@ -1,48 +1,54 @@
 import React from 'react';
-import PropTypes from 'prop-types';
+import axios from 'axios';
+import Movie from './Movie';
+import './App.css';
 
-const foodILike = [
-  {
-    id: 1,
-    name: 'Kimchi',
-    picture: 'https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcRn-owKdGg249Q0W6JKMS3sj3fmA-1NAXHbmF_Mpv0936nk2CnN',
-    rating: 4.5
-  },
-  {
-    id: 2,
-    name: 'Samgyeopsal',
-    picture: 'https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcQjiNclNYVVilJjHmtGFoJ-AIM_-jmKxLD6XWs5DWDxaeIuBocQ',
-    rating: 4.3
+class App extends React.Component {
+  state = {
+    isLoading: true,
+    movies: []
+  };
+
+  getMovies = async() => {
+    const {
+      data: {
+        data: {movies}
+      }
+    } = await axios.get('https://yts-proxy.now.sh/list_movies.json?sort_by=rating');
+    this.setState({movies, isLoading: false});
+  };
+
+  componentDidMount() {
+    this.getMovies();
+  };
+
+  render() {
+    const {isLoading, movies} = this.state;
+    console.log(movies);
+    return (
+      <section className="container">
+        {isLoading ? (
+          <div className="loader">
+            <span className="loader_text">Loading...</span>
+          </div>
+        ) : (
+          <div className="movies">
+            {movies.map(movie => (
+              <Movie
+                key={movie.id}
+                id={movie.id}
+                year={movie.year}
+                title={movie.title}
+                summary={movie.summary}
+                background_image={movie.medium_cover_image}
+                genres={movie.genres}
+              />
+            ))}
+          </div>
+        )}
+      </section>
+    );
   }
-];
-
-function Food({name, picture, rating}) {
-  return <div>
-          <h2>I like {name}</h2>
-          <h4>{rating} / 5.0</h4>>
-          <img src={picture} alt={name}></img>
-        </div>;
-}
-
-Food.propTypes = {
-  name: PropTypes.string.isRequired,
-  picture: PropTypes.string.isRequired,
-  rating: PropTypes.number.isRequired
-};
-
-function App() {
-  return (
-    <div>
-      {foodILike.map(dish => (
-        <Food 
-          key={dish.id} 
-          name={dish.name} 
-          picture={dish.picture} 
-          rating={dish.rating}>
-        </Food>
-      ))}
-    </div>
-  );
 }
 
 export default App;
